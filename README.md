@@ -89,10 +89,17 @@ cd skyreelsinfer
 
 ### Running the gradio interface (only tested on Linux with a 4090)
 
+Install Python development headers e.g. on Ubuntu run:
+
+```bash
+sudo apt-get update
+sudo apt-get install python3-dev
+```
+
 Make sure you have [uv](https://docs.astral.sh/uv/getting-started/installation/) installed
 
 ```bash
-uv run app.py --listen # You can ommit the --listen parameter if you are accessing the interface on the same machine
+uv run app.py --listen # You can omit the --listen parameter if you are accessing the interface on the same machine
 ```
 
 ### Installation Guide for Linux

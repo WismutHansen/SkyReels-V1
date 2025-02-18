@@ -137,7 +137,7 @@ with gr.Blocks(
         )
 
     # Update image input visibility based on the model selection.
-    model_selection.change(update_image_visibility, inputs=model_selection, outputs=[])
+    # model_selection.change(update_image_visibility, inputs=model_selection, outputs=[])
     # Instead, directly bind the output to image_input below.
 
     with gr.Row():
