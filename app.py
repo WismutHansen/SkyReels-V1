@@ -110,7 +110,16 @@ def update_image_visibility(selection):
         return gr.update(visible=False)
 
 
-with gr.Blocks(title="SkyReels Video Inference") as iface:
+css = """
+h4 {
+    text-align: center;
+    display:block;
+}
+"""
+
+with gr.Blocks(
+    title="SkyReels Video Inference", theme=gr.themes.Ocean(), css=css
+) as iface:
     gr.Markdown(
         """
         # SkyReels Video Inference
@@ -149,8 +158,12 @@ with gr.Blocks(title="SkyReels Video Inference") as iface:
         )
 
     with gr.Row():
-        height = gr.Number(value=544, label="Height (px)")
-        width = gr.Number(value=960, label="Width (px)")
+        height = gr.Slider(
+            minimum=16, maximum=1080, step=16, value=544, label="Height (px)"
+        )
+        width = gr.Slider(
+            minimum=16, maximum=1920, step=16, value=960, label="Width (px)"
+        )
         num_frames = gr.Number(value=97, label="Number of Frames")
         num_inference_steps = gr.Number(value=30, label="Inference Steps")
 
