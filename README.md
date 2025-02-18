@@ -20,6 +20,7 @@ SkyReels V1 is the first and most advanced open-source human-centric video found
 3. **Cinematic Lighting and Aesthetics**: Trained on high-quality Hollywood-level film and television data, each generated frame exhibits cinematic quality in composition, actor positioning, and camera angles.
 
 ## 🎥 Demos
+
 <div align="center">
 <video src="https://github.com/user-attachments/docs/assets/2dbd116a-033d-4f7e-bd90-78a3da47cd9c" width="70%"> </video>
 </div>
@@ -44,9 +45,11 @@ Our multi-stage pretraining pipeline, inspired by the <a href="https://huggingfa
 - **Stage 3: High-Quality Fine-Tuning**: We fine-tune the image-to-video model on a high-quality subset of the original dataset, ensuring superior performance and quality.
 
 ## 📊 Benchmark Results
+
 We evaluate the performance of our text-to-video model using <a href="https://github.com/Vchitect/VBench">VBench</a>, comparing it with other outstanding open-source models.
 
 Based on the benchmark results, SkyReels V1 demonstrates SOTA performance among open-source Text-to-Video (T2V) models. Specifically, our model achieves an overall score of 82.43, which is higher than other open-source models such as VideoCrafter-2.0 VEnhancer (82.24) and CogVideoX1.5-5B (82.17). Additionally, our model achieves the highest scores in several key metrics, including Dynamic Degree and Multiple Objects, indicating our model's superior ability to handle complex video generation tasks.
+
 | Models                    | Overall | Quality Score | Semantic Score | Image Quality | Dynamic Degree | Multiple Objects | Spatial Relationship |  
 |---------------------------|---------|---------------|----------------|---------------|----------------|------------------|----------------------|
 | OpenSora V1.3             | 77.23   | 80.14         | 65.62          | 56.21         | 30.28          | 43.58            | 51.61                |
@@ -54,15 +57,14 @@ Based on the benchmark results, SkyReels V1 demonstrates SOTA performance among 
 | VideoCrafter-2.0 VEnhancer| 82.24   | 83.54         | 77.06          | 65.35         | 63.89          | 68.84            | 57.55                |
 | CogVideoX1.5-5B           | 82.17   | 82.78         | 79.76          | 65.02         | 50.93          | 69.65            | 80.25                |
 | HunyuanVideo 540P         | 81.23   | 83.49         | 72.22          | 66.31         | 51.67          | 70.45            | 63.46                |
-| SkyReels V1 540P (Ours)   | **82.43** | **84.62**     | 73.68          | 67.15         | **72.5**       | **71.61**        | 70.83                |    
-
+| SkyReels V1 540P (Ours)   | **82.43** | **84.62**     | 73.68          | 67.15         | **72.5**       | **71.61**        | 70.83                |
 
 ## 📦 Model Introduction
+
 | Model Name      | Resolution | Video Length | FPS | Download Link |
 |-----------------|------------|--------------|-----|---------------|
 | SkyReels-V1-Hunyuan-I2V | 544px960p  | 97           | 24  | 🤗 [Download](https://huggingface.co/Skywork/SkyReels-V1-Hunyuan-I2V) |
 | SkyReels-V1-Hunyuan-T2V | 544px960p  | 97           | 24  | 🤗 [Download](https://huggingface.co/Skywork/SkyReels-V1-Hunyuan-T2V) |
-
 
 ## 🚀 SkyReels Infer Introduction
 
@@ -79,9 +81,18 @@ SkyReelsInfer is a highly efficient video generation inference framework that en
 ## 🛠️ Running Guide
 
 Begin by cloning the repository:
+
 ```shell
 git clone https://github.com/SkyworkAI/SkyReels-V1
 cd skyreelsinfer
+```
+
+### Running the gradio interface (only tested on Linux with a 4090)
+
+Make sure you have [uv](https://docs.astral.sh/uv/getting-started/installation/) installed
+
+```bash
+uv run app.py --listen # You can ommit the --listen parameter if you are accessing the interface on the same machine
 ```
 
 ### Installation Guide for Linux
@@ -95,7 +106,7 @@ pip install -r requirements.txt
 
 When sufficient VRAM is available (e.g., on A800), the lossless version can be run directly.
 
-**Note: When generating videos, the prompt should start with "FPS-24, " as we referenced the controlling the fps training method from <a href=https://ai.meta.com/research/publications/movie-gen-a-cast-of-media-foundation-models>Moviegen</a> during training.**
+**Note: When generating videos, the prompt should start with "FPS-24, " as we referenced the controlling the fps training method from <a href=<https://ai.meta.com/research/publications/movie-gen-a-cast-of-media-foundation-models>Moviegen></a> during training.**
 
 ```shell
 SkyReelsModel = "Skywork/SkyReels-V1-Hunyuan-T2V"
@@ -113,6 +124,7 @@ python3 video_generate.py \
 ### User-Level GPU Inference (RTX4090)
 
 We list the height/width/frame settings we recommend in the following table.
+
 |      Resolution       |           h/w=9:16           |    h/w=16:9     |     h/w=1:1     |
 |:---------------------:|:----------------------------:|:---------------:|:---------------:|
 |         544p          |        544px960px97f        |  960px544px97f |  720px720px97f |
@@ -141,6 +153,7 @@ python3 video_generate.py \
     --high_cpu_memory \
     --parameters_level
 ```
+
 The example above shows generating a 544px960px97f 4s video on a single RTX 4090 with full VRAM optimization, peaking at 18.5G VRAM usage. At maximum VRAM capacity, a 544px960px289f 12s video can be produced (using `--sequence_batch`, taking ~1.5h on one RTX 4090; adding GPUs greatly reduces time).
 
 #### 🚀 Parallel Inference on Multiple GPUs
@@ -176,7 +189,6 @@ This test aims to compare the end-to-end latency of SkyReelsInfer and HunyuanVid
 |:---------------------:|:----------------------------:|:---------------:|:---------------:|
 |         540p          |        544px960px97f        |  30 |  6 |
 
-
 ### User-Level GPU Inference (RTX4090)
 
 In practice, Hunyuanvideo XDIT cannot perform inference on the RTX 4090 due to insufficient VRAM. To address this issue, we implemented fixes based on the official offload, FP8 model weights, and VAE tiling. These include:  
@@ -188,8 +200,7 @@ b) **Offload Strategy**: Enable parameter-level offloading to further reduce VRA
 c) **Multi-GPU Parallelism**: Activate context parallelism, CFG parallelism, and VAE parallelism for distributed processing.  
 d) **Computation Optimization**: Optimize attention layer calculations using SegaAttn and enable Torch.Compile for transformer compilation optimization (supporting both 4-GPU and 8-GPU configurations).
 
-
-|      GPU NUM      |           hunyuanvideo + xdit    |           SkyReelsInfer   | 
+|      GPU NUM      |           hunyuanvideo + xdit    |           SkyReelsInfer   |
 |:---------------------:|:----------------------------:|:----------------------------:|
 |         1          |        VRAM OOM        |        889.31s        |
 |         2          |        VRAM OOM        |        453.69s        |
@@ -197,14 +208,15 @@ d) **Computation Optimization**: Optimize attention layer calculations using Seg
 |         8          |        Cannot split video sequence into ulysses_degree x ring_degree        |        159.43s        |
 
 The table above summarizes the end-to-end latency test results for generating 544p 4-second videos on the RTX 4090 using HunyuanVideo XDIT and SkyReelsVideoInfer. The following conclusions can be drawn:  
+
 - Under the same RTX 4090 resource conditions (4 GPUs), the SkyReelsInfer version reduces end-to-end latency by **58.3%** compared to HunyuanVideo XDIT (293.3s vs. 464.3s).  
 - The SkyReelsInfer version features a more robust deployment strategy, supporting inference deployment across **1 to 8 GPUs** at the user level.
 
-
 ### A800
+
 Based on the A800 (80G), the primary testing focused on comparing the performance differences between HunyuanVideo XDIT and SkyReelsInfer without compromising output quality.
 
-|      GPU NUM      |           hunyuanvideo + xdit    |           SkyReelsInfer   | 
+|      GPU NUM      |           hunyuanvideo + xdit    |           SkyReelsInfer   |
 |:---------------------:|:----------------------------:|:----------------------------:|
 |         1          |        884.20s       |        771.03s        |
 |         2          |        487.22s        |        387.01s        |
@@ -218,6 +230,7 @@ Under the same A800 resource conditions, the SkyReelsInfer version reduces end-t
 The SkyReelsInfer version features a more robust multi-GPU deployment strategy.
 
 ## Acknowledgements
+
 We would like to thank the contributors of <a href="https://huggingface.co/tencent/HunyuanVideo">HunyuanVideo</a> repositories, for their open research and contributions.
 
 ## Citation

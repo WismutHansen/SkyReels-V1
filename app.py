@@ -13,8 +13,7 @@ from skyreelsinfer.offload import OffloadConfig
 
 
 def generate_video(
-    task_type,
-    model_id,
+    model_selection,
     prompt,
     negative_prompt,
     guidance_scale,
@@ -35,11 +34,20 @@ def generate_video(
     image_input,
 ):
     """
-    This function instantiates the SkyReels video inference pipeline using the provided parameters,
-    runs inference, and exports the output as a video file.
+    Instantiate the SkyReels video inference pipeline using the provided parameters,
+    run inference, and export the output as a video file.
     """
-    # Determine the task type based on the dropdown selection.
-    task = TaskType.I2V if task_type == "i2v" else TaskType.T2V
+    # Validate that height and width are divisible by 16.
+    if height % 16 != 0 or width % 16 != 0:
+        return "Error: Both height and width must be divisible by 16. Please adjust your resolution."
+
+    # Set task type and model_id based on the selection.
+    if model_selection == "Image-to-Video":
+        task = TaskType.I2V
+        model_id = "Skywork/SkyReels-V1-Hunyuan-I2V"
+    else:
+        task = TaskType.T2V
+        model_id = "Skywork/SkyReels-V1-Hunyuan-T2V"
 
     # Build kwargs for the inference call.
     kwargs = {
@@ -55,7 +63,7 @@ def generate_video(
         "cfg_for": sequence_batch,
     }
 
-    # For image-to-video (i2v), the user must upload an image.
+    # For image-to-video, require an image input.
     if task == TaskType.I2V:
         if image_input is None:
             return "Error: Please upload an image for image-to-video inference."
@@ -84,7 +92,6 @@ def generate_video(
 
     # Ensure the results directory exists.
     os.makedirs("results", exist_ok=True)
-    # Create a temporary filename based on the prompt and seed.
     safe_prompt = "".join(c if c.isalnum() or c in " _-" else "_" for c in prompt)[:50]
     video_path = os.path.join("results", f"{safe_prompt}_{seed}.mp4")
 
@@ -93,27 +100,36 @@ def generate_video(
     return video_path
 
 
-# Build the Gradio interface.
+def update_image_visibility(selection):
+    """
+    Update the visibility of the image upload component.
+    """
+    if selection == "Image-to-Video":
+        return gr.update(visible=True)
+    else:
+        return gr.update(visible=False)
+
+
 with gr.Blocks(title="SkyReels Video Inference") as iface:
     gr.Markdown(
         """
         # SkyReels Video Inference
-        This interface uses the SkyReels model for text-to-video (t2v) or image-to-video (i2v) generation.
+        Select the model type from the dropdown below. When you select "Image-to-Video", an image upload field will appear.
+        **Note:** Height and width must be divisible by 16.
         """
     )
 
     with gr.Row():
-        task_type = gr.Dropdown(
-            choices=["t2v", "i2v"],
-            value="t2v",
-            label="Task Type",
-            info="Choose 't2v' for text-to-video or 'i2v' for image-to-video.",
+        model_selection = gr.Dropdown(
+            choices=["Text-to-Video", "Image-to-Video"],
+            value="Text-to-Video",
+            label="Model Selection",
+            info="Choose the model type.",
         )
-        model_id = gr.Textbox(
-            value="Skywork/SkyReels-V1-Hunyuan-T2V",
-            label="Model ID",
-            info="For i2v, you can switch to 'Skywork/SkyReels-V1-Hunyuan-I2V' if needed.",
-        )
+
+    # Update image input visibility based on the model selection.
+    model_selection.change(update_image_visibility, inputs=model_selection, outputs=[])
+    # Instead, directly bind the output to image_input below.
 
     with gr.Row():
         prompt = gr.Textbox(
@@ -143,9 +159,9 @@ with gr.Blocks(title="SkyReels Video Inference") as iface:
         gpu_num = gr.Number(value=1, label="GPU Count (world_size)")
 
     with gr.Row():
-        quant = gr.Checkbox(value=False, label="Enable Quantization (FP8 weight-only)")
-        offload = gr.Checkbox(value=False, label="Enable Offload")
-        high_cpu_memory = gr.Checkbox(value=False, label="High CPU Memory")
+        quant = gr.Checkbox(value=True, label="Enable Quantization (FP8 weight-only)")
+        offload = gr.Checkbox(value=True, label="Enable Offload")
+        high_cpu_memory = gr.Checkbox(value=True, label="High CPU Memory")
         parameters_level = gr.Checkbox(value=False, label="Parameters-level Offload")
         compiler_transformer = gr.Checkbox(value=False, label="Compile Transformer")
         sequence_batch = gr.Checkbox(value=False, label="Sequence Batch Mode")
@@ -153,18 +169,23 @@ with gr.Blocks(title="SkyReels Video Inference") as iface:
     with gr.Row():
         fps = gr.Number(value=24, label="FPS")
 
-    # For image-to-video, allow image upload.
-    image_input = gr.Image(type="pil", label="Input Image (for i2v only)", visible=True)
+    # Image input is only shown when "Image-to-Video" is selected.
+    image_input = gr.Image(
+        type="pil", label="Input Image (for Image-to-Video)", visible=False
+    )
+
+    # Bind the model_selection change to update the image_input visibility.
+    model_selection.change(
+        update_image_visibility, inputs=model_selection, outputs=image_input
+    )
 
     generate_button = gr.Button("Generate Video")
-
     output_video = gr.Video(label="Generated Video", format="mp4")
 
     generate_button.click(
         generate_video,
         inputs=[
-            task_type,
-            model_id,
+            model_selection,
             prompt,
             negative_prompt,
             guidance_scale,
@@ -186,7 +207,9 @@ with gr.Blocks(title="SkyReels Video Inference") as iface:
         ],
         outputs=output_video,
     )
-
+    gr.Markdown(
+        "#### Based on [SkyReels-V1-Hunyuan](https://github.com/SkyworkAI/SkyReels-V1)"
+    )
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
