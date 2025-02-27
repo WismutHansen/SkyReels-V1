@@ -102,6 +102,12 @@ Make sure you have [uv](https://docs.astral.sh/uv/getting-started/installation/)
 uv run app.py --listen # You can omit the --listen parameter if you are accessing the interface on the same machine
 ```
 
+or with additional Gradio arguments:
+
+```bash
+uv run app.py -- --gradio-server_name=0.0.0.0 --gradio-share --gradio-auth=user:password
+```
+
 ### Installation Guide for Linux
 
 We recommend CUDA versions 12.2 for the manual installation.
