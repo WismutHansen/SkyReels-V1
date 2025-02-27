@@ -14,3 +14,4 @@ scripts/.gradio/*
 *.pkl
 *.csv
 *.jsonl
+.gradio/*
