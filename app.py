@@ -2,14 +2,14 @@ import argparse
 import os
 
 import gradio as gr
+import torch
 from diffusers.utils import export_to_video, load_image
 
-import torch
+from skyreelsinfer import TaskType
+from skyreelsinfer.offload import OffloadConfig
 
 # Import our SkyReels modules
 from skyreelsinfer.skyreels_video_infer import SkyReelsVideoInfer
-from skyreelsinfer import TaskType
-from skyreelsinfer.offload import OffloadConfig
 
 
 def generate_video(
@@ -230,6 +230,36 @@ if __name__ == "__main__":
         action="store_true",
         help="If set, the Gradio app will listen on all network interfaces (0.0.0.0) to be accessible on the local network.",
     )
+    parser.add_argument(
+        "extra_args",
+        nargs="*",
+        help="Any number of additional arguments. Use `gradio-` prefix to set corresponding Gradio args, e.g. `--gradio-server_name=0.0.0.0`.",
+    )
     args = parser.parse_args()
 
-    iface.launch(server_name="0.0.0.0" if args.listen else None)
+    gradio_kwargs = {}
+    for arg in args.extra_args:
+        if not arg.startswith("--gradio-"):
+            continue
+        arg = arg.removeprefix("--gradio-")
+        try:
+            key, value = arg.split("=", 1)
+        except ValueError:
+            # bool arg given
+            key, value = arg, True
+        gradio_kwargs[key] = value
+
+    if args.listen:
+        gradio_kwargs["server_name"] = "0.0.0.0"
+
+    if "auth" in gradio_kwargs:
+        try:
+            username, password = gradio_kwargs["auth"].split(":", 1)
+        except ValueError as exc:
+            raise ValueError(
+                "Username and password must be provided in the format --gradio-auth='username:password'"
+            ) from exc
+        gradio_kwargs["auth"] = (username, password)
+
+    print("Gradio args:", gradio_kwargs)
+    iface.launch(**gradio_kwargs)

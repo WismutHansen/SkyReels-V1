@@ -3,7 +3,7 @@ name = "skyreels-v1"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "accelerate==1.1.1",
     "bitsandbytes==0.45.0",
@@ -22,6 +22,7 @@ dependencies = [
     "torchvision==0.20.1",
     "transformers==4.46.3",
     "xformers==0.0.29.post1",
+    "gradio-client>=1.4.2",
 ]
 
 [tool.uv.sources]
